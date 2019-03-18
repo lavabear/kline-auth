@@ -1,3 +1,6 @@
+.btn-margin {
+    margin: 7px 3px;
+}
 
 .graphiql-container {
   min-height: 99vh;

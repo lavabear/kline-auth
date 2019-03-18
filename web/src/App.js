@@ -1,46 +1,74 @@
 import React, { Component } from 'react';
+import { Navbar, Button } from 'react-bootstrap';
 import './App.css';
-import ApolloClient from 'apollo-boost';
-import {ApolloProvider} from "react-apollo";
-import {
-    BrowserRouter as Router, Switch, Route, Link
-} from 'react-router-dom'
-
-import Home from './Home/Home'
-import Users from './Users/Users'
-import NewUser from "./NewUser/NewUser";
-
-const client = new ApolloClient({
-    uri: '/api/graphql'
-});
-
-let NotFound = () => (
-    <div>
-      <h1>Sorry this isn't what you're looking for.</h1>
-    </div>
-)
 
 class App extends Component {
-  render() {
-    return (
-      <Router>
-          <ApolloProvider client={client}>
-              <nav>
-                  <ul className='menu'>
-                      <li><Link to="/">Home</Link></li>
-                      <li><Link to="/users">Users</Link></li>
-                  </ul>
-              </nav>
-              <Switch>
-                  <Route exact path="/" component={Home}/>
-                  <Route exact path="/users" component={Users}/>
-                  <Route exact path="/users/new" component={NewUser}/>
-                  <Route path="/" component={NotFound}/>
-              </Switch>
-          </ApolloProvider>
-      </Router>
-    );
-  }
+    goTo(route) {
+        this.props.history.replace(`/${route}`)
+    }
+
+    login() {
+        this.props.auth.login();
+    }
+
+    logout() {
+        this.props.auth.logout();
+    }
+
+    componentDidMount() {
+        const { renewSession } = this.props.auth;
+
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            renewSession();
+        }
+    }
+
+    render() {
+        const { isAuthenticated } = this.props.auth;
+
+        return (
+            <div>
+                <Navbar fluid>
+                    <Navbar.Header>
+                        <Navbar.Brand>
+                            <a href="#">KLine - Auth0</a>
+                        </Navbar.Brand>
+                        <Button
+                            bsStyle="primary"
+                            className="btn-margin"
+                            onClick={this.goTo.bind(this, 'home')}
+                        >
+                            Home
+                        </Button>
+                        {
+                            !isAuthenticated() && (
+                                <Button
+                                    id="qsLoginBtn"
+                                    bsStyle="primary"
+                                    className="btn-margin"
+                                    onClick={this.login.bind(this)}
+                                >
+                                    Log In
+                                </Button>
+                            )
+                        }
+                        {
+                            isAuthenticated() && (
+                                <Button
+                                    id="qsLogoutBtn"
+                                    bsStyle="primary"
+                                    className="btn-margin"
+                                    onClick={this.logout.bind(this)}
+                                >
+                                    Log Out
+                                </Button>
+                            )
+                        }
+                    </Navbar.Header>
+                </Navbar>
+            </div>
+        );
+    }
 }
 
 export default App;
